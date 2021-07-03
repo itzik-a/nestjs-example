@@ -5,8 +5,10 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  ValidationPipe,
 } from '@nestjs/common'
 import { CreateEventDto } from './create-event.dto'
 import { EventsService } from './events.service'
@@ -21,18 +23,28 @@ export class EventsController {
     return this.eventsService.findAll()
   }
 
+  @Get('practice')
+  practice() {
+    return this.eventsService.practice()
+  }
+
   @Get(':id')
-  findOne(@Param('id') id) {
+  findOne(@Param('id', ParseIntPipe) id) {
     return this.eventsService.findOne(id)
   }
 
   @Post()
-  create(@Body() input: CreateEventDto) {
+  create(
+    @Body(new ValidationPipe({ groups: ['create'] })) input: CreateEventDto,
+  ) {
     return this.eventsService.create(input)
   }
 
   @Patch(':id')
-  update(@Param('id') id, @Body() input: UpdateEventDto) {
+  update(
+    @Param('id') id,
+    @Body(new ValidationPipe({ groups: ['update'] })) input: UpdateEventDto,
+  ) {
     return this.eventsService.update(id, input)
   }
 

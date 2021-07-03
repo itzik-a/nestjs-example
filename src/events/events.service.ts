@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateEventDto } from './create-event.dto'
 import { UpdateEventDto } from './update-event.dto'
 import { Event } from './event.entity'
-import { Repository } from 'typeorm'
+import { Like, MoreThan, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
@@ -15,7 +15,19 @@ export class EventsService {
     return await this.repository.find()
   }
 
-  async findOne(id: string) {
+  async practice() {
+    return await this.repository.find({
+      select: ['id', 'description'],
+      where: [{ id: MoreThan(2) }, { description: Like('%#1%') }],
+      take: 2,
+      skip: 1,
+      order: {
+        id: 'DESC',
+      },
+    })
+  }
+
+  async findOne(id: number) {
     return await this.repository.findOne(id)
   }
 

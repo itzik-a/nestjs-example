@@ -35,28 +35,28 @@ export class EventsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id) {
-    return this.eventsService.findOne(id)
+  async findOne(@Param('id', ParseIntPipe) id) {
+    return await this.eventsService.findOne(id)
   }
 
   @Post()
-  create(
+  async create(
     @Body(new ValidationPipe({ groups: ['create'] })) input: CreateEventDto,
   ) {
-    return this.eventsService.create(input)
+    return await this.eventsService.create(input)
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id,
     @Body(new ValidationPipe({ groups: ['update'] })) input: UpdateEventDto,
   ) {
-    return this.eventsService.update(id, input)
+    return await this.eventsService.update(id, input)
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id) {
-    this.eventsService.remove(id)
+  async remove(@Param('id') id) {
+    await this.eventsService.remove(id)
   }
 }

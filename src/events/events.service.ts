@@ -27,6 +27,10 @@ export class EventsService {
     })
   }
 
+  async practice2() {
+    return await this.repository.findOne(1, { relations: ['attendees'] })
+  }
+
   async findOne(id: number) {
     const event = await this.repository.findOne(id)
     if (!event) {

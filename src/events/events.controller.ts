@@ -34,6 +34,11 @@ export class EventsController {
     return this.eventsService.practice()
   }
 
+  @Get('practice2')
+  async practice2() {
+    return await this.eventsService.practice2()
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id) {
     return await this.eventsService.findOne(id)

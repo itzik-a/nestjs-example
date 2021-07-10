@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -18,9 +19,14 @@ import { UpdateEventDto } from './update-event.dto'
 export class EventsController {
   constructor(private eventsService: EventsService) {}
 
+  private readonly logger = new Logger(EventsController.name)
+
   @Get()
-  findAll() {
-    return this.eventsService.findAll()
+  async findAll() {
+    this.logger.log('Hit the findAll route')
+    const events = await this.eventsService.findAll()
+    this.logger.debug(`Found ${events.length} events`)
+    return events
   }
 
   @Get('practice')

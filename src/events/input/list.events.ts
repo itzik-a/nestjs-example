@@ -1,5 +1,6 @@
 export class ListEvents {
   when?: WhenEventFilter
+  page: number = 1
 }
 
 export enum WhenEventFilter {

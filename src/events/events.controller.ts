@@ -11,12 +11,14 @@ import {
   Patch,
   Post,
   Query,
+  UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
 import { CreateEventDto } from './input/create-event.dto'
 import { EventsService } from './events.service'
 import { UpdateEventDto } from './input/update-event.dto'
 import { ListEvents } from './input/list.events'
+import { PaginationOptions } from 'src/pagination/paginator'
 
 @Controller('events')
 export class EventsController {
@@ -25,13 +27,14 @@ export class EventsController {
   private readonly logger = new Logger(EventsController.name)
 
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true })) // populate default values for queries
   async findAll(@Query() filter: ListEvents) {
-    this.logger.debug(filter)
-    const events = await this.eventsService.getEventsWithAttendeeCountFiltered(
+    this.logger.debug(`filter: ${filter}`)
+
+    return await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
       filter,
+      { total: true, currentPage: filter.page, limit: 3 },
     )
-    this.logger.debug(`Found ${events.length} events`)
-    return events
   }
 
   @Get('practice')

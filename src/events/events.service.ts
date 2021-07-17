@@ -6,6 +6,7 @@ import { Like, MoreThan, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Attendee, AttendeeAnswerEnum } from './attendee.entity'
 import { ListEvents, WhenEventFilter } from './input/list.events'
+import { paginate, PaginationOptions } from 'src/pagination/paginator'
 
 @Injectable()
 export class EventsService {
@@ -53,12 +54,10 @@ export class EventsService {
       )
   }
 
-  async getEventsWithAttendeeCountFiltered(
-    filter?: ListEvents,
-  ): Promise<Event[] | []> {
+  private getEventsWithAttendeeCountFiltered(filter?: ListEvents) {
     let query = this.getEventsWithAttendeeCountQuery()
     if (!filter) {
-      return query.getMany()
+      return query
     }
     if (filter.when) {
       filter.when = Number(filter.when)
@@ -83,16 +82,26 @@ export class EventsService {
       }
     }
 
-    return await query.getMany()
+    return query
   }
 
-  async findAll(): Promise<Event[]> {
+  public async getEventsWithAttendeeCountFilteredPaginated(
+    filter: ListEvents,
+    paginationOptions: PaginationOptions,
+  ) {
+    return await paginate(
+      await this.getEventsWithAttendeeCountFiltered(filter),
+      paginationOptions,
+    )
+  }
+
+  public async findAll(): Promise<Event[]> {
     const query = this.getEventsWithAttendeeCountQuery()
     this.logger.debug(query.getSql())
     return await query.getMany()
   }
 
-  async practice() {
+  public async practice() {
     return await this.eventRepo.find({
       select: ['id', 'description'],
       where: [{ id: MoreThan(2) }, { description: Like('%#1%') }],
@@ -104,7 +113,7 @@ export class EventsService {
     })
   }
 
-  async practice2() {
+  public async practice2() {
     const event = await this.eventRepo.findOne(2, { relations: ['attendees'] })
     const attendee = new Attendee()
     attendee.name = 'Snufkin using cascade'
@@ -116,7 +125,7 @@ export class EventsService {
     return event
   }
 
-  async findOne(id: number): Promise<Event | undefined> {
+  public async findOne(id: number): Promise<Event | undefined> {
     const query = this.getEventsWithAttendeeCountQuery().andWhere(
       'e.id = :id',
       { id },
@@ -126,14 +135,14 @@ export class EventsService {
     return await query.getOne()
   }
 
-  async create(input: CreateEventDto) {
+  public async create(input: CreateEventDto) {
     return await this.eventRepo.save({
       ...input,
       date: new Date(input.date),
     })
   }
 
-  async update(id: string, input: UpdateEventDto) {
+  public async update(id: string, input: UpdateEventDto) {
     const event = await this.eventRepo.findOne(id)
     return await this.eventRepo.save({
       ...event,
@@ -142,7 +151,7 @@ export class EventsService {
     })
   }
 
-  async remove(id: string) {
+  public async remove(id: string) {
     const event = await this.eventRepo.findOne(id)
     if (!event) {
       throw new NotFoundException()

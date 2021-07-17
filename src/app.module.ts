@@ -8,6 +8,7 @@ import { AppService } from './app.service'
 import ormConfig from './config/orm.config'
 import ormConfigProd from './config/orm.config.prod'
 import { EventsModule } from './events/events.module'
+import { TrainingModule } from './training/training.module';
 
 const isJapanese = true
 const APP_SERVICE_CLASS = isJapanese ? AppJapanService : AppService
@@ -25,6 +26,7 @@ const APP_SERVICE_CLASS = isJapanese ? AppJapanService : AppService
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
     EventsModule,
+    TrainingModule,
   ],
   controllers: [AppController],
   providers: [

@@ -20,4 +20,10 @@ export class Event {
 
   @OneToMany(() => Attendee, (attendee) => attendee.event, { cascade: true })
   attendees: Attendee[]
+
+  // No Column decorator, so they don't get saved in the DB
+  attendeeCount?: number
+  attendeeRejected?: number
+  attendeeMaybe?: number
+  attendeeAccepted?: number
 }

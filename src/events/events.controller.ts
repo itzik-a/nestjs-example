@@ -5,15 +5,18 @@ import {
   Get,
   HttpCode,
   Logger,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   ValidationPipe,
 } from '@nestjs/common'
-import { CreateEventDto } from './create-event.dto'
+import { CreateEventDto } from './input/create-event.dto'
 import { EventsService } from './events.service'
-import { UpdateEventDto } from './update-event.dto'
+import { UpdateEventDto } from './input/update-event.dto'
+import { ListEvents } from './input/list.events'
 
 @Controller('events')
 export class EventsController {
@@ -22,9 +25,11 @@ export class EventsController {
   private readonly logger = new Logger(EventsController.name)
 
   @Get()
-  async findAll() {
-    this.logger.log('Hit the findAll route')
-    const events = await this.eventsService.findAll()
+  async findAll(@Query() filter: ListEvents) {
+    this.logger.debug(filter)
+    const events = await this.eventsService.getEventsWithAttendeeCountFiltered(
+      filter,
+    )
     this.logger.debug(`Found ${events.length} events`)
     return events
   }
@@ -41,7 +46,12 @@ export class EventsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id) {
-    return await this.eventsService.findOne(id)
+    const event = await this.eventsService.findOne(id)
+
+    if (!event) {
+      throw new NotFoundException()
+    }
+    return event
   }
 
   @Post()

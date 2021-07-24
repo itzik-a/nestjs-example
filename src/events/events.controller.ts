@@ -18,7 +18,6 @@ import { CreateEventDto } from './input/create-event.dto'
 import { EventsService } from './events.service'
 import { UpdateEventDto } from './input/update-event.dto'
 import { ListEvents } from './input/list.events'
-import { PaginationOptions } from 'src/pagination/paginator'
 
 @Controller('events')
 export class EventsController {
@@ -74,7 +73,11 @@ export class EventsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id) {
-    await this.eventsService.remove(id)
+  async deleteEvent(@Param('id') id) {
+    const result = await this.eventsService.deleteEvent(id)
+
+    if (result?.affected !== 1) {
+      throw new NotFoundException()
+    }
   }
 }

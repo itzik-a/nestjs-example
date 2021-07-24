@@ -1,8 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CreateEventDto } from './input/create-event.dto'
 import { UpdateEventDto } from './input/update-event.dto'
 import { Event } from './event.entity'
-import { Like, MoreThan, Repository } from 'typeorm'
+import { DeleteResult, Like, MoreThan, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Attendee, AttendeeAnswerEnum } from './attendee.entity'
 import { ListEvents, WhenEventFilter } from './input/list.events'
@@ -151,11 +151,11 @@ export class EventsService {
     })
   }
 
-  public async remove(id: string) {
-    const event = await this.eventRepo.findOne(id)
-    if (!event) {
-      throw new NotFoundException()
-    }
-    await this.eventRepo.remove(event)
+  public async deleteEvent(id: string): Promise<DeleteResult> {
+    return await this.eventRepo
+      .createQueryBuilder('e')
+      .delete()
+      .where('id = :id', { id })
+      .execute()
   }
 }

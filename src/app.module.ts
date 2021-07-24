@@ -5,10 +5,11 @@ import { AppController } from './app.controller'
 import { AppDummy } from './app.dummy'
 import { AppJapanService } from './app.japan.service'
 import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
 import ormConfig from './config/orm.config'
 import ormConfigProd from './config/orm.config.prod'
 import { EventsModule } from './events/events.module'
-import { TrainingModule } from './training/training.module';
+import { TrainingModule } from './training/training.module'
 
 const isJapanese = true
 const APP_SERVICE_CLASS = isJapanese ? AppJapanService : AppService
@@ -27,6 +28,7 @@ const APP_SERVICE_CLASS = isJapanese ? AppJapanService : AppService
     }),
     EventsModule,
     TrainingModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

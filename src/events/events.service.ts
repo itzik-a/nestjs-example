@@ -1,10 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common'
 import { CreateEventDto } from './input/create-event.dto'
 import { UpdateEventDto } from './input/update-event.dto'
 import { Event } from './event.entity'
-import { DeleteResult, Like, MoreThan, Repository } from 'typeorm'
+import { DeleteResult, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Attendee, AttendeeAnswerEnum } from './attendee.entity'
+import { AttendeeAnswerEnum } from './attendee.entity'
 import { ListEvents, WhenEventFilter } from './input/list.events'
 import { paginate, PaginationOptions } from 'src/pagination/paginator'
 import { User } from 'src/auth/user.entity'
@@ -13,8 +18,6 @@ import { User } from 'src/auth/user.entity'
 export class EventsService {
   constructor(
     @InjectRepository(Event) private readonly eventRepo: Repository<Event>,
-    @InjectRepository(Attendee)
-    private readonly attendeeRepo: Repository<Attendee>,
   ) {}
 
   private readonly logger = new Logger(EventsService.name)
@@ -102,29 +105,29 @@ export class EventsService {
     return await query.getMany()
   }
 
-  public async practice() {
-    return await this.eventRepo.find({
-      select: ['id', 'description'],
-      where: [{ id: MoreThan(2) }, { description: Like('%#1%') }],
-      take: 2,
-      skip: 1,
-      order: {
-        id: 'DESC',
-      },
-    })
-  }
+  // public async practice() {
+  //   return await this.eventRepo.find({
+  //     select: ['id', 'description'],
+  //     where: [{ id: MoreThan(2) }, { description: Like('%#1%') }],
+  //     take: 2,
+  //     skip: 1,
+  //     order: {
+  //       id: 'DESC',
+  //     },
+  //   })
+  // }
 
-  public async practice2() {
-    const event = await this.eventRepo.findOne(2, { relations: ['attendees'] })
-    const attendee = new Attendee()
-    attendee.name = 'Snufkin using cascade'
-    attendee.id = 36
-    event.attendees.push(attendee)
+  // public async practice2() {
+  //   const event = await this.eventRepo.findOne(2, { relations: ['attendees'] })
+  //   const attendee = new Attendee()
+  //   attendee.name = 'Snufkin using cascade'
+  //   attendee.id = 36
+  //   event.attendees.push(attendee)
 
-    // await this.attendeeRepo.save(attendee)
-    await this.eventRepo.save(event)
-    return event
-  }
+  //   // await this.attendeeRepo.save(attendee)
+  //   await this.eventRepo.save(event)
+  //   return event
+  // }
 
   public async findOne(id: number): Promise<Event | undefined> {
     const query = this.getEventsWithAttendeeCountQuery().andWhere(
@@ -144,8 +147,20 @@ export class EventsService {
     })
   }
 
-  public async update(id: string, input: UpdateEventDto) {
+  public async update(id: string, input: UpdateEventDto, user: User) {
     const event = await this.eventRepo.findOne(id)
+
+    if (!event) {
+      throw new NotFoundException()
+    }
+
+    if (user.id !== event.organizerId) {
+      throw new ForbiddenException(
+        null,
+        'You are not authorized to change this event',
+      )
+    }
+
     return await this.eventRepo.save({
       ...event,
       ...input,

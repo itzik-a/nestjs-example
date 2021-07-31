@@ -31,6 +31,9 @@ export class Event {
   @ManyToOne(() => User, (user) => user.organized)
   organizer: User
 
+  @Column({ nullable: true })
+  organizerId: number
+
   // No Column decorator, so they don't get saved in the DB
   attendeeCount?: number
   attendeeRejected?: number

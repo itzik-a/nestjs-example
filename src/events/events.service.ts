@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Attendee, AttendeeAnswerEnum } from './attendee.entity'
 import { ListEvents, WhenEventFilter } from './input/list.events'
 import { paginate, PaginationOptions } from 'src/pagination/paginator'
+import { User } from 'src/auth/user.entity'
 
 @Injectable()
 export class EventsService {
@@ -135,9 +136,10 @@ export class EventsService {
     return await query.getOne()
   }
 
-  public async create(input: CreateEventDto) {
+  public async create(input: CreateEventDto, user: User): Promise<Event> {
     return await this.eventRepo.save({
       ...input,
+      organizer: user,
       date: new Date(input.date),
     })
   }
